@@ -14,8 +14,8 @@ independent groups as described in:
 
 This example is taken from:
 > E. Stripling, "Distribution-free statistical inference for the comparison of
-> central tendencies," MSc thesis, Dept. LStat, KU Leuven, Leuven, Belgium,
-> 2013.
+> central tendencies," <br/> 
+> MSc thesis, Dept. LStat, KU Leuven, Leuven, Belgium, 2013.
 
 In a randomization test, the hypotheses are as follows:
 <p align="center">
@@ -93,8 +93,8 @@ p value: 0.3388
 To illustrate randomization tests on a more realistic example, consider the
 "smart drug" example described in
 > J. K. Kruschke, "Bayesian estimation supersedes the t test."
-> *Journal of Experimental Psychology: General*, vol. 142, no. 2,
-> pp. 573-603, May 2013. [[Online](http://dx.doi.org/10.1037/a0029146)]
+> *Journal of Experimental Psychology: General*, <br/>
+> vol. 142, no. 2, pp. 573-603, May 2013. [[Online](http://dx.doi.org/10.1037/a0029146)]
 
 In which, the research question is: _Do people who take the smart drug perform_
 _better on the IQ test than those in the control group?_
