@@ -10,13 +10,13 @@ independent groups as described in:
 
 ## Installation
 Either clone the repository
-```
-git clone https://github.com/estripling/randomization_tests
+```bash
+$ git clone https://github.com/estripling/randomization_tests
 ```
 
-or download it as a zip file and unzip it. Then, run
-```
-python setup.py install
+or download it as a zip file and unzip it. Then, `cd` in and run
+```bash
+$ python setup.py install
 ```
 
 ## Basic example
