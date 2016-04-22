@@ -23,7 +23,7 @@ $ python setup.py install
 
 This example is taken from:
 > E. Stripling, "Distribution-free statistical inference for the comparison of
-> central tendencies," <br/> 
+> central tendencies," <br/>
 > MSc thesis, Dept. LStat, KU Leuven, Leuven, Belgium, 2013.
 
 In a randomization test, the hypotheses are as follows:
@@ -40,10 +40,11 @@ assigned to the two treatment groups. We conduct the experiment and measure the
 </p>
 
 Our test statistic of interest is the difference between arithmetic means,
-where _t<sub>obs</sub>_ is the observed test statistic value. Then, permute
-the data and compute the test statistic for each data permutation, which
-creates the _reference distribution_. In this example, the _systematic_
-approach is used, meaning that all possible data permutations are generated.
+where _t<sub>obs</sub>_ is the observed test statistic value. For carry out the
+randomization test, permute the data and compute the test statistic for each
+data permutation, which creates the _reference distribution_.
+In this example, the _systematic_ approach is used, meaning that all possible
+data permutations are generated.
 
 <p align="center">
     <img src="misc/permutations.png" width="700"/>
@@ -109,7 +110,7 @@ In which, the research question is: _Do people who take the smart drug perform_
 _better on the IQ test than those in the control group?_
 In the experiment, 47 people received the supposedly IQ-enhancement drug
 (group A), and 42 people received an placebo (group B).
-Data have been obtained from
+Data have been taken from
 [here](https://github.com/strawlab/best/blob/master/examples/smart_drug.py).
 
 For this example, two randomization test are carried out: (1) one in which the
@@ -148,5 +149,5 @@ statistic is robuster against extreme observations, resulting in p value of 1%.
 Thus, with the more reasonable test statistic, the null hypothesis is rejected.
 One can therefore conclude that the response of at least one person would have
 been different if (s)he had received the other treatment. Note that the
-rejection of the null hypothesis is in line with the conclusion of the robust
-Bayesian estimation approach carried out by Kruschke.
+rejection of the null hypothesis with (2) is in line with the conclusion of
+the robust Bayesian estimation approach carried out by Kruschke.
