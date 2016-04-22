@@ -8,7 +8,7 @@ independent groups as described in:
 
 * Tested with Python 3 (not Python 2.7)
 
-## Install
+## Installation
 Either clone the repository
 ```
 git clone https://github.com/estripling/randomization_tests
