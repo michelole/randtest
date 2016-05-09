@@ -7,6 +7,7 @@ independent groups as described in:
 ## Requirements
 
 * Tested with Python 3 (not Python 2.7)
+* [SciPy](https://www.scipy.org/) for the trimmed mean
 
 ## Installation
 Either clone the repository
