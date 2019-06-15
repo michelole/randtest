@@ -9,17 +9,6 @@ independent groups as described in:
 * Tested with Python 3 (not Python 2.7)
 * [SciPy](https://www.scipy.org/) for the trimmed mean
 
-## Installation
-Either clone the repository
-```bash
-$ git clone https://github.com/estripling/randomization_tests.git
-```
-
-or download it as a zip file and unzip it. Then, `cd` in and run
-```bash
-$ python setup.py install
-```
-
 ## Basic example
 
 This example is taken from:
