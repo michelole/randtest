@@ -41,7 +41,7 @@ class RandTestResult():
         num_successes : int
             Number of successes within generated number of permutations
             according to the `alternative`. For example,
-            if `alternative='two_sided'`, `num_successes` correspons to the
+            if `alternative='two_sided'`, `num_successes` corresponds to the
             number of permutations where the absolute test statistic value is
             larger than or equal to the observed test statistic value.
 
@@ -170,7 +170,6 @@ class RandTest:
         self.data = data_group_a + data_group_b
         self.n_x = len(data_group_a)
         self.n_data = len(self.data)
-        self.data_indices = range(self.n_data)
 
         self.num_successes = 0
         self.num_permutations = num_permutations
@@ -202,7 +201,7 @@ class RandTest:
             with mp.Pool(self.ncores) as pool:
                 for is_success in pool.imap_unordered(
                         self.compute_test_statistic,
-                        combinations(self.data_indices, self.n_x)):
+                        combinations(range(self.n_data), self.n_x)):
                     self.num_permutations += 1
                     self.num_successes += int(is_success)
         else:
@@ -316,7 +315,7 @@ def randtest(
         num_successes : int
             Number of successes within generated number of permutations
             according to the `alternative`. For example,
-            if `alternative='two_sided'`, `num_successes` correspons to the
+            if `alternative='two_sided'`, `num_successes` corresponds to the
             number of permutations where the absolute test statistic value is
             larger than or equal to the observed test statistic value.
 
