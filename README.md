@@ -4,10 +4,11 @@ independent groups as described in:
 > E. Edgington and P. Onghena, Randomization Tests, 4th ed.<br/>
 > Boca Raton, FL: Chapman & Hall/CRC, Taylor & Francis Group, 2007.
 
+
 ## Requirements
 
-* Tested with Python 3 (not Python 2.7)
-* [SciPy](https://www.scipy.org/) for the trimmed mean
+* Python 3
+
 
 ## Basic example
 
@@ -30,9 +31,9 @@ assigned to the two treatment groups. We conduct the experiment and measure the
 </p>
 
 Our test statistic of interest is the difference between arithmetic means,
-where _t<sub>obs</sub>_ is the observed test statistic value. For carry out the
-randomization test, permute the data and compute the test statistic for each
-data permutation, which creates the _reference distribution_.
+where _t<sub>obs</sub>_ is the observed test statistic value. 
+For carry out the randomization test, permute the data and compute the test 
+statistic for each data permutation, which creates the _reference distribution_.
 In this example, the _systematic_ approach is used, meaning that all possible
 data permutations are generated.
 
@@ -50,51 +51,56 @@ That is, simply count how often _T_ (in absolute sense) is equal to or
 larger than |_t<sub>obs</sub>_|, and divide it by the number of data
 permutations. In this example, the exact two-sided p value equals 2/6 or 33%.
 
-To carry out the analysis in Python, do the following:
+Use the `randtest` function to  carry out the analysis in Python.
+Note that `num_permutations = -1` specifies the systematic approach.
 
-```python
->>> from randomization_tests import RandomizationTests
->>> groupA_data = [5, 6]
->>> groupB_data = [8, 10]
->>> sys_rtest = RandomizationTests(method='systematic')
->>> sys_rtest.execute(groupA_data, groupB_data)
->>> sys_rtest.summary()
-Systematic randomization test for two groups
-Alternative hypothesis: two_sided
-Arithmetic mean of group A: 5.50
-Arithmetic mean of group B: 9.00
-Observed test statistic value: -3.50
-Count: 2
-Number of permutations: 6
-p value: 0.3333
+```{python}
+>>> from randtest import randtest
+>>> x = (5, 6)
+>>> y = (8, 10)
+>>> result = randtest(x, y, num_permutations=-1)
+>>> print(result)
+<class 'randtest.base.RandTestResult'>
+Method = Systematic
+Alternative = two_sided
+MCT(data of group A) = 5.5
+MCT(data of group B) = 9
+Observed test statistic value = -3.5
+Number of successes = 2
+Number of permutations = 6
+p value = 0.333333
 ```
 
 The systematic approach, however, quickly becomes infeasible if the sample size
-increases. In this circumstances, the _Monte Carlo randomization test_ can be
-used to approximate the p value, which is carried out by default:
-`method='monte'`.
+increases. 
+In this circumstances, the _Monte Carlo randomization test_ can be
+used to approximate the p value. 
+It is carried out by default with a positive number for `num_permutations`.
 
-```python
->>> monte_rtest = RandomizationTests(seed=101)
->>> monte_rtest.execute(groupA_data, groupB_data, number_of_permutations=10000)
->>> monte_rtest.summary()
-Monte Carlo randomization test for two groups
-Alternative hypothesis: two_sided
-Arithmetic mean of group A: 5.50
-Arithmetic mean of group B: 9.00
-Observed test statistic value: -3.50
-Count: 3388
-Number of permutations: 10000
-p value: 0.3388
+```{python}
+>>> from randtest import randtest
+>>> x = (5, 6)
+>>> y = (8, 10)
+>>> result = randtest(x, y, num_permutations=10000, num_cores=2, seed=0)
+>>> print(result)
+<class 'randtest.base.RandTestResult'>
+Method = Monte Carlo
+Alternative = two_sided
+MCT(data of group A) = 5.5
+MCT(data of group B) = 9
+Observed test statistic value = -3.5
+Number of successes = 3312
+Number of permutations = 10000
+p value = 0.3312
 ```
 
 
 ## Smart drug example
 To illustrate randomization tests on a more realistic example, consider the
-"smart drug" example described in
+"smart drug" example described in [(Online)](http://dx.doi.org/10.1037/a0029146):
 > J. K. Kruschke, "Bayesian estimation supersedes the t test."
 > *Journal of Experimental Psychology: General*, <br/>
-> vol. 142, no. 2, pp. 573-603, May 2013. [[Online](http://dx.doi.org/10.1037/a0029146)]
+> vol. 142, no. 2, pp. 573-603, May 2013. 
 
 In which, the research question is: _Do people who take the smart drug perform_
 _better on the IQ test than those in the control group?_
@@ -109,35 +115,39 @@ test statistic is the difference between trimmed means (20% on each side) in
 order to account for the outliers in the data.
 
 
-```bash
-$ python examples/smart_drug.py
-==================================================
-Monte Carlo randomization test for two groups
-Alternative hypothesis: two_sided
-Arithmetic mean of group A: 101.91
-Arithmetic mean of group B: 100.36
-Observed test statistic value: 1.56
-Count: 1252
-Number of permutations: 10000
-p value: 0.1252
-- - - - - - - - - - - - - - - - - - - - - - - - -
-Monte Carlo randomization test for two groups
-Alternative hypothesis: two_sided
-Trimmed Mean of group A: 101.59
-Trimmed Mean of group B: 100.54
-Observed test statistic value: 1.05
-Count: 100
-Number of permutations: 10000
-p value: 0.0100
-==================================================
+```{bash}
+$ make example_smart_drug 
+python3 examples/smart_drug.py
+MCT = Arithmetic Mean
+<class 'randtest.base.RandTestResult'>
+Method = Monte Carlo
+Alternative = two_sided
+MCT(data of group A) = 101.915
+MCT(data of group B) = 100.357
+Observed test statistic value = 1.55775
+Number of successes = 128
+Number of permutations = 1000
+p value = 0.128
+
+MCT = 20% Trimmed Mean
+<class 'randtest.base.RandTestResult'>
+Method = Monte Carlo
+Alternative = two_sided
+MCT(data of group A) = 101.586
+MCT(data of group B) = 100.538
+Observed test statistic value = 1.04775
+Number of successes = 10
+Number of permutations = 1000
+p value = 0.01
 ```
 
-For (1), the p value equals 12.52%, meaning that one does not reject the null
-hypothesis at a significance level of 5%. However, this test is naive, since
-the outliers cause a distortion of the arithmetic means. In (2), the test
-statistic is robuster against extreme observations, resulting in p value of 1%.
+For (1), the p value equals 12.8%, meaning that one does not reject the null
+hypothesis at a significance level of 5%. 
+However, this test is naive, since the outliers cause a distortion of the 
+arithmetic means. In (2), the test statistic is robuster against extreme 
+observations, resulting in p value of 1%.
 Thus, with the more reasonable test statistic, the null hypothesis is rejected.
 One can therefore conclude that the response of at least one person would have
-been different if (s)he had received the other treatment. Note that the
-rejection of the null hypothesis with (2) is in line with the conclusion of
-the robust Bayesian estimation approach carried out by Kruschke.
+been different if (s)he had received the other treatment. 
+Note that the rejection of the null hypothesis with (2) is in line with the 
+conclusion of the robust Bayesian estimation approach carried out by Kruschke.

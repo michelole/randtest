@@ -1,7 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
-
-"""The data are taken from the example that reproduces Figure 3 of
+"""
+The data are taken from the example that reproduces Figure 3 of
 
 J. K. Kruschke, "Bayesian estimation supersedes the t test."
     Journal of Experimental Psychology: General,
@@ -23,39 +21,54 @@ difference between trimmed means (20% on each side) in order to account for
 the outliers.
 """
 
+from statistics import mean
+from os.path import abspath, dirname, sep
 from scipy import stats
-from randomization_tests import RandomizationTests
-
-SEED = 42  # To reproduce the results in the post
-N_PERM = 10000  # Number of permutations
-
-drug = (101, 100, 102, 104, 102, 97, 105, 105, 98, 101,
-        100, 123, 105, 103, 100, 95, 102, 106, 109, 102,
-        82, 102, 100, 102, 102, 101, 102, 102, 103, 103,
-        97, 97, 103, 101, 97, 104, 96, 103, 124, 101,
-        101, 100, 101, 101, 104, 100, 101)
-placebo = (99, 101, 100, 101, 102, 100, 97, 101, 104, 101,
-           102, 102, 100, 105, 88, 101, 100, 104, 100, 100,
-           100, 101, 102, 103, 97, 101, 101, 100, 101, 99,
-           101, 100, 100, 101, 100, 99, 101, 100, 102, 99,
-           100, 99)
+from randtest import randtest
 
 
-def trimmed_mean(x, percent=0.2):
-    return stats.trim_mean(x, percent)
-
-# Standard test statistic is the arithmetic mean
-rtest_diff_means = RandomizationTests(seed=SEED)
-rtest_diff_trimmed_means = RandomizationTests(
-    trimmed_mean,
-    'Trimmed Mean',
-    seed=SEED,
+def smart_drug(mct, nperm=1000, seed=0):
+    """Randomization test with smart drug data"""
+    this_directory = dirname(__file__)
+    parent_directory = abspath(
+        '{}'.format(sep).join(this_directory.split(sep)[:-1])
     )
+    ifname_group_a = (
+        parent_directory + "/data/smart_drug_data_treatment_group.dat"
+    )
+    ifname_group_b = (
+        parent_directory + "/data/smart_drug_data_placebo_group.dat"
+    )
+    with open(ifname_group_a, 'r') as fobj:
+        group_a = tuple(int(val.strip()) for val in fobj.readlines())
+    with open(ifname_group_b, 'r') as fobj:
+        group_b = tuple(int(val.strip()) for val in fobj.readlines())
 
-print('=' * 50)
-rtest_diff_means.execute(drug, placebo, N_PERM)
-rtest_diff_means.summary()
-print('- ' * 25)
-rtest_diff_trimmed_means.execute(drug, placebo, N_PERM)
-rtest_diff_trimmed_means.summary()
-print('=' * 50)
+    result = randtest(
+        group_a,
+        group_b,
+        mct,
+        num_permutations=nperm,
+        num_cores=-1,
+        seed=seed)
+    print(result)
+
+
+def trimmed_mean(data, percent=0.2) -> float:
+    """Trimmed mean"""
+    mct_val = stats.trim_mean(tuple(data), percent)
+    return float(mct_val)
+
+
+def main():
+    """Main function"""
+    print("MCT = Arithmetic Mean")
+    smart_drug(mean)
+    print()
+
+    print("MCT = 20% Trimmed Mean")
+    smart_drug(trimmed_mean)
+
+
+if __name__ == '__main__':
+    main()

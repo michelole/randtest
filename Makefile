@@ -26,6 +26,12 @@ develop:
 	$(PYEXE) -m pip install -e .
 
 
+## example_smart_drug:  Run the smart drug example
+.PHONY: example_smart_drug
+example_smart_drug:
+	$(PYEXE) examples/smart_drug.py
+
+
 ## tests:  Run tests
 .PHONY: tests
 tests:
