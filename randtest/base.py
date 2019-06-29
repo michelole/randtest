@@ -8,11 +8,13 @@ Implements:
 Allows for user-defined:
  - Test statistic
  - Measure of central tendency
+
 """
-import types
+
 import random
 import logging
 import multiprocessing as mp
+from types import FunctionType, GeneratorType
 from itertools import combinations
 from statistics import mean
 
@@ -50,6 +52,8 @@ class RandTestResult():
 
         p_value : int
             The p value is equal to `num_successes / num_permutations`.
+
+        seed : int, None,
     """
 
     def __init__(
@@ -60,7 +64,8 @@ class RandTestResult():
             mctb: float,
             statistic: float,
             num_successes=0,
-            num_permutations=0):
+            num_permutations=0,
+            seed=None):
         self._method = method
         self._alternative = alternative
         self._mcta = mcta
@@ -68,6 +73,7 @@ class RandTestResult():
         self._tobs = statistic
         self._nhits = num_successes
         self._nperms = num_permutations
+        self._seed = seed
 
     @property
     def method(self) -> str:
@@ -109,6 +115,11 @@ class RandTestResult():
         """Getter: p_value"""
         return self.num_successes / self.num_permutations
 
+    @property
+    def seed(self) -> float:
+        """Getter: seed"""
+        return self._seed
+
     def __repr__(self):
         repr_string = "{}".format(
             self.__class__,
@@ -125,9 +136,9 @@ class RandTestResult():
             "Observed test statistic value = {:g}\n" +
             "Number of successes = {:d}\n" +
             "Number of permutations = {:d}\n" +
-            "p value = {:g}"
-        )
-        return print_string.format(
+            "p value = {:g}\n"
+            "seed = {}"
+        ).format(
             self.__class__,
             self.method,
             self.alternative,
@@ -137,7 +148,9 @@ class RandTestResult():
             self.num_successes,
             self.num_permutations,
             self.p_value,
+            self.seed,
         )
+        return print_string
 
 
 class RandTest:
@@ -153,7 +166,7 @@ class RandTest:
                  tstat,
                  num_permutations,
                  alternative,
-                 n_cores,
+                 n_jobs,
                  seed):
         self.mct = mct
         self.tstat = tstat
@@ -163,7 +176,7 @@ class RandTest:
             "Systematic"
         )
         self.alternative = alternative
-        self.ncores = n_cores
+        self.njobs = n_jobs
         self.rng = check_random_state(seed)
 
         self.tobs = self.tstat(data_group_a, data_group_b, self.mct)
@@ -198,7 +211,7 @@ class RandTest:
         """Run the multiprocessing computation of randomization test."""
         if self.method == "Systematic":
             self.num_permutations = 0
-            with mp.Pool(self.ncores) as pool:
+            with mp.Pool(self.njobs) as pool:
                 for is_success in pool.imap_unordered(
                         self.compute_test_statistic,
                         combinations(range(self.n_data), self.n_x)):
@@ -207,7 +220,7 @@ class RandTest:
         else:
             # Valid Monte Carlo Randomization Test includes observed tobs
             self.num_successes += 1
-            with mp.Pool(self.ncores) as pool:
+            with mp.Pool(self.njobs) as pool:
                 for is_success in pool.imap_unordered(
                         self.compute_test_statistic,
                         self._get_random_indices()):
@@ -220,8 +233,11 @@ class RandTest:
             yield self.rng.sample(range(self.n_data), self.n_x)
 
 
-def test_statistic(data_group_a, data_group_b, mct) -> float:
-    """Compute test statistic"""
+def test_statistic(
+        data_group_a: GeneratorType,
+        data_group_b: GeneratorType,
+        mct: FunctionType) -> float:
+    """Compute test statistic: Difference between MCTs"""
     return mct(data_group_a) - mct(data_group_b)
 
 
@@ -253,7 +269,7 @@ def randtest(
         tstat=test_statistic,
         num_permutations=10000,
         alternative="two_sided",
-        num_cores=1,
+        num_jobs=1,
         seed=None):
     """
     Perform a randomization test with custom test statistic.
@@ -289,8 +305,8 @@ def randtest(
     alternative : str
         Possible values: 'two_sided' (default), 'greater', and 'less'.
 
-    num_cores : int
-        Number of cores to carry out the computation.
+    num_jobs : int
+        Number of jobs to carry out the computation.
 
     seed : None, int, random.Random() instance
 
@@ -329,8 +345,8 @@ def randtest(
         data_group_a = tuple(data_group_a)
     if not isinstance(data_group_b, tuple):
         data_group_b = tuple(data_group_b)
-    assert isinstance(mct, types.FunctionType)
-    assert isinstance(tstat, types.FunctionType)
+    assert isinstance(mct, FunctionType)
+    assert isinstance(tstat, FunctionType)
     assert isinstance(num_permutations, int) and num_permutations != 0
     if num_permutations < 0:
         assert num_permutations == -1
@@ -338,29 +354,30 @@ def randtest(
         isinstance(alternative, str) and
         alternative in ["two_sided", "greater", "less"]
     )
-    assert isinstance(num_cores, int) and num_cores != 0
+    assert isinstance(num_jobs, int) and num_jobs != 0
     logging.basicConfig(format='%(asctime)s %(message)s')
 
     max_cores = mp.cpu_count()
-    if num_cores > 0:
-        n_cores = num_cores
-        if num_cores > max_cores:
+    if num_jobs > 0:
+        n_jobs = num_jobs
+        if num_jobs > max_cores:
             info_msg = (
-                "Specified number of cores ({:d}) is larger "
-                "than maximum ({:d}). "
-                "Setting number of cores to maximum {:d}."
+                "Specified number of jobs ({:d}) is larger than the " +
+                "maximum number of cores ({:d}). " +
+                "Setting number of jobs to {:d}."
             )
-            logging.info(info_msg.format(num_cores, max_cores, max_cores))
-            n_cores = max_cores
+            logging.info(info_msg.format(num_jobs, max_cores, max_cores))
+            n_jobs = max_cores
     else:
-        n_cores = max_cores + num_cores + 1
-        if n_cores <= 0:
+        n_jobs = max_cores + num_jobs + 1
+        if n_jobs <= 0:
             info_msg = (
-                "Specified number of cores ({:d}) goes beyond maximum ({:d}). "
-                "Setting number of cores to maximum {:d}."
+                "Specified number of jobs ({:d}) goes beyond " +
+                "the maximum number of cores ({:d}). " +
+                "Setting number of jobs to {:d}."
             )
-            logging.info(info_msg.format(num_cores, max_cores, max_cores))
-            n_cores = max_cores
+            logging.info(info_msg.format(num_jobs, max_cores, max_cores))
+            n_jobs = max_cores
 
     rtest = RandTest(
         data_group_a,
@@ -369,7 +386,7 @@ def randtest(
         tstat,
         num_permutations,
         alternative,
-        n_cores,
+        n_jobs,
         seed,
     )
     rtest.run()
@@ -381,4 +398,5 @@ def randtest(
         rtest.tobs,
         rtest.num_successes,
         rtest.num_permutations,
+        seed,
     )

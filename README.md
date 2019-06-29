@@ -1,13 +1,39 @@
 # Randomization tests for two-sample comparison
+
 This Python package implements a randomization test for the comparison of two
 independent groups as described in:
 > E. Edgington and P. Onghena, Randomization Tests, 4th ed.<br/>
 > Boca Raton, FL: Chapman & Hall/CRC, Taylor & Francis Group, 2007.
 
 
-## Requirements
+## Implementation
+
+### Requirements
 
 * Python 3
+
+
+### Highlights
+
+This implementation demonstrates various concepts of advanced Python programming
+such as:
+
+* *Packaging*: Creation of a Python package, a collection of Python modules structurally organized, to allow for an easy re-usability of the provided functionality, which is the `randtest()` function.
+
+* *Test-Driven Development (TDD)*: Creation of reliable code with the intended functionality (see `tests/`).
+
+* *Functional Programming*: Passing functions to arguments of `randtest()`,
+i.e. `mct` and `tstat` (see below).
+The former allows passing a user-defined function for the measure of central tendency computed in the test statistic (default: `statistics.mean`).
+The latter permits passing a user-defined function for the computation of the test statistic. By default, the difference between measures is computed: `mct(data_group_a) - mct(data_group_b)`).
+
+* *Object-Oriented Programming (OOP)*: The `randtest()` function, for example, returns an instance of the class `randtest.base.RandTestResult`, holding all relevant information of the test result.
+
+* *Generators*: The proper use of Python generators allows for a scalable and memory efficient implementation (i.e., results are processed as they come in).
+*Note*: If a user-defined function is passsed to `mct`, it requires handing a generator object.
+
+* *Multiprocessing*: Using the `num_jobs` argument permits carrying out the computation over multiple CPUs. 
+*Note*: Because of it, `randtest()` must be executed below `if __name__ == '__main__':` if a user-defined function is passed to `mct` or `tstat`.
 
 
 ## Basic example
@@ -47,9 +73,8 @@ Based on the data permutations, the two-sided p value can be computed:
     <img src="misc/pvalue.png" width="450"/>
 </p>
 
-That is, simply count how often _T_ (in absolute sense) is equal to or
-larger than |_t<sub>obs</sub>_|, and divide it by the number of data
-permutations. In this example, the exact two-sided p value equals 2/6 or 33%.
+That is, simply count how often _T_ (in absolute sense) is equal to or larger than |_t<sub>obs</sub>_| (i.e., number of successes), and divide it by the number of data permutations. 
+In this example, the exact two-sided p value equals 2/6 or 33%.
 
 Use the `randtest` function to  carry out the analysis in Python.
 Note that `num_permutations = -1` specifies the systematic approach.
@@ -69,19 +94,20 @@ Observed test statistic value = -3.5
 Number of successes = 2
 Number of permutations = 6
 p value = 0.333333
+seed = None
 ```
 
 The systematic approach, however, quickly becomes infeasible if the sample size
 increases. 
 In this circumstances, the _Monte Carlo randomization test_ can be
 used to approximate the p value. 
-It is carried out by default with a positive number for `num_permutations`.
+It is carried out by default with a positive integer for `num_permutations`.
 
 ```{python}
 >>> from randtest import randtest
 >>> x = (5, 6)
 >>> y = (8, 10)
->>> result = randtest(x, y, num_permutations=10000, num_cores=2, seed=0)
+>>> result = randtest(x, y, num_permutations=10000, num_jobs=2, seed=0)
 >>> print(result)
 <class 'randtest.base.RandTestResult'>
 Method = Monte Carlo
@@ -92,7 +118,45 @@ Observed test statistic value = -3.5
 Number of successes = 3312
 Number of permutations = 10000
 p value = 0.3312
+seed = None
 ```
+
+We can approximate the p value to an arbitrarily degree, simply by increasing the number of permutations.
+
+
+## User-defined function
+
+By default, `randtest()` computes the difference between arithmetic means.
+If another measure of central tendency is of interest, one can pass a user-defined function.
+Say, we are interested in the trimmed mean.
+We first need to define it:
+
+```{python}
+def trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
+    """Trimmed mean"""
+    data_sorted = tuple(sorted(data))
+    num_data_pnts = len(data_sorted)
+    lowercut = int(num_data_pnts * trim_percent)
+    uppercut = num_data_pnts - lowercut
+    data_trimmed = data_sorted[lowercut:uppercut]
+    return sum(data_trimmed) / len(data_trimmed)
+```
+
+Then, we can pass it to `randtest()` with `mct=trimmed_mean`.
+
+Similarly, we proceed if we want to pass a user-defined function for the test statistic.
+For example, the difference between the measures of central tendencies can be implemented as follows:
+
+```{python}
+def test_statistic(
+        data_group_a: GeneratorType,
+        data_group_b: GeneratorType,
+        mct: FunctionType) -> float:
+    """Compute test statistic: Difference between MCTs"""
+    return mct(data_group_a) - mct(data_group_b)
+```
+
+We then simply pass it to `tstat=test_statistic`.
 
 
 ## Smart drug example
@@ -128,6 +192,7 @@ Observed test statistic value = 1.55775
 Number of successes = 128
 Number of permutations = 1000
 p value = 0.128
+seed = 0
 
 MCT = 20% Trimmed Mean
 <class 'randtest.base.RandTestResult'>
@@ -139,6 +204,7 @@ Observed test statistic value = 1.04775
 Number of successes = 10
 Number of permutations = 1000
 p value = 0.01
+seed = 0
 ```
 
 For (1), the p value equals 12.8%, meaning that one does not reject the null
