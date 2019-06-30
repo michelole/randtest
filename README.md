@@ -63,7 +63,7 @@ In a randomization test, the hypotheses are as follows:
 </p>
 
 Now, suppose we have two treatment groups, **A** and **B**, and four experimental units (designated as *a*, *b*, *c*, and *d*), which are randomly assigned to the two treatment groups.
-We conduct the experiment and measure the response of each experimental units. 
+We conduct the experiment and measure the response of each experimental units.
 Assume we observed the following data:
 <p align="center">
     <img src="misc/observed_data.png" width="400"/>
@@ -167,6 +167,27 @@ def test_statistic(
 
 We then simply pass it to `tstat=test_statistic`.
 
+### Comparison: `trimmed_mean()` vs `scipy.stats.trim_mean()`
+
+As for the trimmed mean, one could surely use SciPy implementation as well.
+Let's compare the execution times.
+First, for the implementation as shown above:
+
+```
+%timeit -n 100000 trimmed_mean(x)
+5.95 µs ± 155 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+```
+
+Next, SciPy's implementation:
+
+```
+%timeit -n 100000 trim_mean(x, .2)
+39.1 µs ± 468 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+```
+
+We observe that our user-defined function for the trimmed mean is more than 6 times faster than the SciPy implementation, and on top of it also has a smaller variation.
+*Note*: Measurements are taken on the same machine.
+
 
 ## Smart drug example
 To illustrate the use of randomization tests on a more realistic example, consider the "smart drug" example described in [(Online)](http://dx.doi.org/10.1037/a0029146):
@@ -212,7 +233,7 @@ seed = 0
 
 For (1), the approximated p value equals 12.8%, meaning that one does not reject the null hypothesis at a significance level of 5%.
 However, this test is *naive*, since the outliers cause a distortion of the
-arithmetic means. 
+arithmetic means.
 As for (2), the test statistic is robuster against extreme observations, resulting in an approximated p value of 1%.
 Thus, with the more reasonable test statistic, the null hypothesis is rejected.
 One can therefore conclude that the response of at least one person would have been different if (s)he had received the other treatment.
@@ -242,7 +263,7 @@ $ head group_*.dat
 We then obtain the same result as shown in the previous example when executing:
 
 ```{bash}
-$ randtest-mean -p -1 group_A.dat group_B.dat 
+$ randtest-mean -p -1 group_A.dat group_B.dat
 <class 'randtest.base.RandTestResult'>
 Method = Systematic
 Alternative = two_sided
