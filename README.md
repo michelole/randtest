@@ -63,7 +63,7 @@ In a randomization test, the hypotheses are as follows:
 
 Now, suppose we have two treatment groups, **A** and **B**, and four experimental units (designated as *a*, *b*, *c*, and *d*), which are randomly assigned to the two treatment groups.
 We conduct the experiment and measure the response of each experimental units. 
-Assume we observed the following data
+Assume we observed the following data:
 <p align="center">
     <img src="misc/observed_data.png" width="400"/>
 </p>
@@ -108,7 +108,7 @@ seed = None
 The systematic approach, however, quickly becomes infeasible if the sample size increases.
 In this circumstances, the *Monte Carlo randomization test* can be used to approximate the p value.
 The `randtest()` function performs a Monte Carlo randomization test by default with `num_permutations=10000` randomly generated data permutations.
-As the number of permutations is larger, we can make use of multiple CPUs for the computation.
+As the number of permutations is large, we can make use of multiple CPUs for the computation.
 Following, two cores are used by specifying `num_jobs=2` and a seed value is passed to the random number generator for reproducibility.
 
 ```{python}
@@ -177,7 +177,8 @@ The research question of interest is: *Do people who take the smart drug perform
 In the experiment, 47 people received the supposedly IQ-enhancement drug (group A), and 42 people received an placebo (group B).
 Data are taken from [here](https://github.com/strawlab/best/blob/master/examples/smart_drug.py).
 
-For this example, two randomization test are carried out: (1) one in which the test statistic is the difference between the arithmetic means, and (2) in which the test statistic is the difference between the 20% trimmed means (i.e., trimmed 20% on each side) in order to account for the outliers in the data (execute the `example_smart_drug.py`).
+For this example, two randomization test are carried out: (1) one in which the test statistic is the difference between the arithmetic means, and (2) in which the test statistic is the difference between the 20% trimmed means (i.e., trimmed 20% on each side) in order to account for the outliers in the data.
+Run the `example_smart_drug.py` script as follows:
 
 ```{bash}
 $ make example_smart_drug
@@ -208,17 +209,16 @@ p value = 0.01
 seed = 0
 ```
 
-For (1), the p value equals 12.8%, meaning that one does not reject the null
-hypothesis at a significance level of 5%.
+For (1), the approximated p value equals 12.8%, meaning that one does not reject the null hypothesis at a significance level of 5%.
 However, this test is *naive*, since the outliers cause a distortion of the
 arithmetic means. 
-As for (2), the test statistic is robuster against extreme observations, resulting in p value of 1%.
+As for (2), the test statistic is robuster against extreme observations, resulting in an approximated p value of 1%.
 Thus, with the more reasonable test statistic, the null hypothesis is rejected.
 One can therefore conclude that the response of at least one person would have been different if (s)he had received the other treatment.
-Note that the rejection of the null hypothesis with (2) is in line with the conclusion of the robust Bayesian estimation approach carried out by Kruschke.
+Note that, in (2), the rejection of the null hypothesis is in line with the conclusion of the robust Bayesian estimation approach carried out by Kruschke.
 
 
-## Command Line Interface
+## Command line interface
 
 Currently, two entry points are exposed that allow performing a randomization test from the command line.
 
@@ -270,7 +270,7 @@ p value = 0.01
 seed = 0
 ```
 
-This gives us the full power of the CLI.
+With that, this gives us the full power of the CLI.
 We can easily redo the analysis, for example, for the 15% trimmed mean by passing the `-c 15` flag:
 
 ```{bash}
@@ -287,4 +287,4 @@ p value = 0.018
 seed = 0
 ```
 
-The test results remains significant.
+The test result remains significant.
