@@ -218,6 +218,7 @@ class RandTest:
                         combinations(range(self.n_data), self.n_x)):
                     self.num_permutations += 1
                     self.num_successes += int(is_success)
+                    self._log_progress()
         else:
             # Valid Monte Carlo Randomization Test includes observed tobs
             self.num_successes += 1
@@ -226,6 +227,16 @@ class RandTest:
                         self.compute_test_statistic,
                         self._get_random_indices()):
                     self.num_successes += int(is_success)
+                    self._log_progress()
+
+    def _log_progress(self):
+        """Log Progress"""
+        log_msg = "p value = {:d} / {:d} = {:g}".format(
+            self.num_successes,
+            self.num_permutations,
+            self.num_successes / self.num_permutations,
+        )
+        logging.info(log_msg)
 
     def _get_random_indices(self):
         # Valid Monte Carlo Randomization Test includes observed tobs
@@ -271,6 +282,7 @@ def randtest(
         num_permutations=10000,
         alternative="two_sided",
         num_jobs=1,
+        log_level="warn",
         seed=None):
     """
     Perform a randomization test with custom test statistic.
@@ -303,6 +315,11 @@ def randtest(
 
     num_jobs : int
         Number of jobs to carry out the computation.
+
+    log_level : str
+        Set log level.
+        Possible values: 'debug', 'info', 'warn' (default), 'error',
+        and 'critical'.
 
     seed : None, int, random.Random() instance
 
@@ -351,28 +368,57 @@ def randtest(
         alternative in ["two_sided", "greater", "less"]
     )
     assert isinstance(num_jobs, int) and num_jobs != 0
-    logging.basicConfig(format='%(asctime)s %(message)s')
+    assert (
+        isinstance(log_level, str) and
+        log_level in ["debug", "info", "warn", "error", "critical"]
+    )
+    log_levels = {
+        "debug": logging.DEBUG,
+        "info": logging.INFO,
+        "warn": logging.WARNING,
+        "error": logging.ERROR,
+        "critical": logging.CRITICAL,
+    }
+    logging.basicConfig(
+        level=log_levels.get(log_level, logging.WARNING),
+        format=(
+            "%(levelname)s :: " +
+            "%(name)s :: " +
+            "pid = %(process)d :: " +
+            "%(asctime)s :: " +
+            "%(message)s"
+        ),
+        #  datefmt='%Y-%m-%d %H:%M:%S'
+    )
 
     max_cores = mp.cpu_count()
     if num_jobs > 0:
         n_jobs = num_jobs
         if num_jobs > max_cores:
-            info_msg = (
+            log_msg = (
                 "Specified number of jobs ({:d}) is larger than the " +
                 "maximum number of cores ({:d}). " +
                 "Setting number of jobs to {:d}."
+            ).format(
+                num_jobs,
+                max_cores,
+                max_cores,
             )
-            logging.info(info_msg.format(num_jobs, max_cores, max_cores))
+            logging.warning(log_msg)
             n_jobs = max_cores
     else:
         n_jobs = max_cores + num_jobs + 1
         if n_jobs <= 0:
-            info_msg = (
+            log_msg = (
                 "Specified number of jobs ({:d}) goes beyond " +
                 "the maximum number of cores ({:d}). " +
                 "Setting number of jobs to {:d}."
+            ).format(
+                num_jobs,
+                max_cores,
+                max_cores,
             )
-            logging.info(info_msg.format(num_jobs, max_cores, max_cores))
+            logging.warning(log_msg)
             n_jobs = max_cores
 
     rtest = RandTest(

@@ -26,6 +26,7 @@ def main():
         num_permutations=args.p,
         alternative=args.a,
         num_jobs=args.n,
+        log_level=args.l,
         seed=args.s)
     print(result)
 

@@ -53,6 +53,14 @@ def argparse_cli(description):
         help="number of jobs (default: 1)."
     )
     parser.add_argument(
+        "-l",
+        metavar="log_level",
+        type=str,
+        choices=["debug", "info", "warn", "error", "critical"],
+        default="warn",
+        help="set log level (default: 'warn')."
+    )
+    parser.add_argument(
         "-s",
         metavar="seed",
         type=int,

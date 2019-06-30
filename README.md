@@ -47,6 +47,7 @@ The latter permits passing a user-defined function for the computation of the te
 *Note*: Because of it, `randtest()` must be executed below `if __name__ == '__main__':` if a user-defined function is passed to `mct` or `tstat`.
 
 * *Command line interface (CLI)*: Setting up entry points to make functionality available on the CLI (see below).
+* *Logging*: Use the `log_level` argument in `randtest()` (or `-l` in the CLI applications).
 
 
 ## Theory: Basic example
@@ -271,10 +272,10 @@ seed = 0
 ```
 
 With that, this gives us the full power of the CLI.
-We can easily redo the analysis, for example, for the 15% trimmed mean by passing the `-c 15` flag:
+We can easily redo the analysis, for example, for the 15% trimmed mean by passing the `-t 15` flag:
 
 ```{bash}
-$ randtest-tmean -p 1000 -n 2 -s 0 -c 15 $(ls smart_drug_data_{treatment,placebo}_group.dat | sort -r)
+$ randtest-tmean -p 1000 -n 2 -s 0 -t 15 $(ls smart_drug_data_{treatment,placebo}_group.dat | sort -r)
 <class 'randtest.base.RandTestResult'>
 Method = Monte Carlo
 Alternative = two_sided

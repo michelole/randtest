@@ -17,7 +17,7 @@ def main():
     """
     parser = argparse_cli(description)
     parser.add_argument(
-        "-c",
+        "-t",
         metavar="[0-49]",
         type=int,
         choices=range(0, 50),
@@ -25,7 +25,7 @@ def main():
         help="value in percent used for trimming (default: 20)."
     )
     args = parser.parse_args()
-    alpha = args.c / 100
+    alpha = args.t / 100
     # Use functools.partial to set parameters
     tmean = partial(trimmed_mean, trim_percent=alpha)
 
@@ -40,6 +40,7 @@ def main():
         num_permutations=args.p,
         alternative=args.a,
         num_jobs=args.n,
+        log_level=args.l,
         seed=args.s)
     print(result)
 
