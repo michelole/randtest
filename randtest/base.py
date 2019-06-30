@@ -13,6 +13,7 @@ Allows for user-defined:
 
 import random
 import logging
+import functools
 import multiprocessing as mp
 from types import FunctionType, GeneratorType
 from itertools import combinations
@@ -285,17 +286,11 @@ def randtest(
         Default: mean().
 
     tstat : function
-        Test statistic. Default:
+        Test statistic.
         Default: Difference between the mcts of the two groups.
 
-    method : str
-        Determines how permutations are generated: if value is `systematic`,
-        All possible permutations are considered (grows exponentially!)
-        If value is `monte`, the Monte Carlo randomization test is performed,
-        meaning that data permutations are generated randomly.
-
     num_permutations : int
-        Number of permutations to carry out for the randomization test.
+        Number of permutations to be carried out for the randomization test.
         If `num_permutations > 0`, a Monte Carlo randomization test is
         performed with the specified number of randomly generated data
         permutations.  If `num_permutations = -1`, a systematic randomization
@@ -303,6 +298,7 @@ def randtest(
         generated.
 
     alternative : str
+        Alternative hypothesis.
         Possible values: 'two_sided' (default), 'greater', and 'less'.
 
     num_jobs : int
@@ -345,7 +341,7 @@ def randtest(
         data_group_a = tuple(data_group_a)
     if not isinstance(data_group_b, tuple):
         data_group_b = tuple(data_group_b)
-    assert isinstance(mct, FunctionType)
+    assert isinstance(mct, (FunctionType, functools.partial))
     assert isinstance(tstat, FunctionType)
     assert isinstance(num_permutations, int) and num_permutations != 0
     if num_permutations < 0:

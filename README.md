@@ -5,6 +5,8 @@ independent groups as described in:
 > E. Edgington and P. Onghena, Randomization Tests, 4th ed.<br/>
 > Boca Raton, FL: Chapman & Hall/CRC, Taylor & Francis Group, 2007.
 
+*Note*: As for the randomization test, it is assumed that the data are originated from a controlled experiment.
+
 
 ## Implementation
 
@@ -25,16 +27,17 @@ such as:
 * *Functional Programming*: Passing functions to arguments of `randtest()`,
 i.e. `mct` and `tstat` (see below).
 The former allows passing a user-defined function for the measure of central tendency computed in the test statistic (default: `statistics.mean`).
-The latter permits passing a user-defined function for the computation of the test statistic. By default, the difference between measures is computed: `mct(data_group_a) - mct(data_group_b)`).
+The latter permits passing a user-defined function for the computation of the test statistic. By default, the difference between measures is computed: `mct(data_group_a) - mct(data_group_b)`.
 
 * *Object-Oriented Programming (OOP)*: The `randtest()` function, for example, returns an instance of the class `randtest.base.RandTestResult`, holding all relevant information of the test result.
 
 * *Generators*: The proper use of Python generators allows for a scalable and memory efficient implementation (i.e., results are processed as they come in).
-*Note*: If a user-defined function is passsed to `mct`, it requires handing a generator object.
+*Note*: If a user-defined function is passed to `mct`, it requires handing a generator object.
 
 * *Multiprocessing*: Using the `num_jobs` argument permits carrying out the computation over multiple CPUs. 
 *Note*: Because of it, `randtest()` must be executed below `if __name__ == '__main__':` if a user-defined function is passed to `mct` or `tstat`.
 
+* *Command line interface (CLI)*: Setting up entry points to make functionality available on the CLI.
 
 ## Basic example
 
@@ -101,13 +104,13 @@ The systematic approach, however, quickly becomes infeasible if the sample size
 increases. 
 In this circumstances, the _Monte Carlo randomization test_ can be
 used to approximate the p value. 
-It is carried out by default with a positive integer for `num_permutations`.
+It is carried out by default with a positive integer for `num_permutations = 10000`.
 
 ```{python}
 >>> from randtest import randtest
 >>> x = (5, 6)
 >>> y = (8, 10)
->>> result = randtest(x, y, num_permutations=10000, num_jobs=2, seed=0)
+>>> result = randtest(x, y, num_jobs=2, seed=0)
 >>> print(result)
 <class 'randtest.base.RandTestResult'>
 Method = Monte Carlo
@@ -121,7 +124,7 @@ p value = 0.3312
 seed = None
 ```
 
-We can approximate the p value to an arbitrarily degree, simply by increasing the number of permutations.
+We can approximate the p value to an arbitrary degree, simply by increasing the number of permutations.
 
 
 ## User-defined function
@@ -182,6 +185,7 @@ order to account for the outliers in the data.
 ```{bash}
 $ make example_smart_drug 
 python3 examples/smart_drug.py
+[...]
 MCT = Arithmetic Mean
 <class 'randtest.base.RandTestResult'>
 Method = Monte Carlo

@@ -24,8 +24,8 @@ the outliers.
 
 import pathlib
 from statistics import mean
-from types import GeneratorType
 from randtest import randtest
+from randtest.mcts import trimmed_mean
 
 
 def smart_drug(mct, nperm=1000, seed=0):
@@ -51,16 +51,6 @@ def smart_drug(mct, nperm=1000, seed=0):
         num_jobs=-1,
         seed=seed)
     print(result)
-
-
-def trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
-    """Trimmed mean"""
-    data_sorted = tuple(sorted(data))
-    num_data_pnts = len(data_sorted)
-    lowercut = int(num_data_pnts * trim_percent)
-    uppercut = num_data_pnts - lowercut
-    data_trimmed = data_sorted[lowercut:uppercut]
-    return sum(data_trimmed) / len(data_trimmed)
 
 
 def main():

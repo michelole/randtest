@@ -1,6 +1,7 @@
 # Global parameters
 SHELL := /bin/bash
 PYEXE := python3
+PGK_NAME = randtest
 
 # Main
 .PHONY: all help program
@@ -26,9 +27,22 @@ develop:
 	$(PYEXE) -m pip install -e .
 
 
-## example_smart_drug:  Run the smart drug example
-.PHONY: example_smart_drug
-example_smart_drug:
+## uninstall:  Uninstall (development) package
+.PHONY: uninstall
+uninstall:
+	$(PYEXE) -m pip uninstall --yes $(PGK_NAME)
+
+
+## dev-uninstall:  Uninstall (development) package
+.PHONY: dev-uninstall
+dev-uninstall:
+	$(PYEXE) -m pip uninstall --yes $(PGK_NAME)
+	rm -r $(PGK_NAME).egg-info
+
+
+## example-smart-drug:  Run the smart drug example
+.PHONY: example-smart-drug
+example-smart-drug:
 	$(PYEXE) examples/smart_drug.py
 
 
@@ -36,3 +50,9 @@ example_smart_drug:
 .PHONY: tests
 tests:
 	cd tests/; make tests; cd -
+
+
+## rmdir:  Remove __pychache__ directories
+.PHONY: rmdir
+rmdir:
+	rm -rf $(find . -name "__pycache__" -type d)

@@ -5,6 +5,10 @@ Unit tests for randtest
 import unittest
 from types import GeneratorType
 from randtest import randtest
+from randtest.mcts import (
+    arithmetic_mean,
+    trimmed_mean,
+)
 
 
 class TestRandTest(unittest.TestCase):
@@ -183,21 +187,12 @@ def mct_func_mean(data: GeneratorType) -> float:
     # Then a lambda should work as well.
     #
     # HERE: define mct_func_mean function to be used
-    sum_data_pnts, num_data_pnts = 0, 0
-    for item in data:
-        sum_data_pnts += item
-        num_data_pnts += 1
-    return sum_data_pnts / num_data_pnts
+    return arithmetic_mean(data)
 
 
 def mct_func_trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
     """MCT test function: trimmed mean"""
-    data_sorted = tuple(sorted(data))
-    num_data_pnts = len(data_sorted)
-    lowercut = int(num_data_pnts * trim_percent)
-    uppercut = num_data_pnts - lowercut
-    data_trimmed = data_sorted[lowercut:uppercut]
-    return sum(data_trimmed) / len(data_trimmed)
+    return trimmed_mean(data, trim_percent)
 
 
 def test_statistic_difference(data1, data2, mct) -> float:
