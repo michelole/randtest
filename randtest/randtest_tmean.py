@@ -22,7 +22,7 @@ def main():
         type=int,
         choices=range(0, 50),
         default=20,
-        help="Value in percent used for trimming (default: 20)."
+        help="value in percent used for trimming (default: 20)."
     )
     args = parser.parse_args()
     alpha = args.c / 100

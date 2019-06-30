@@ -15,31 +15,41 @@ independent groups as described in:
 * Python 3
 
 
+### Installation
+
+To install the `randtest` package, run the following on the command line:
+
+```{bash}
+$ make install
+```
+
+This will `pip` install the package in your activated Python environment.
+
+
 ### Highlights
 
-This implementation demonstrates various concepts of advanced Python programming
-such as:
+This implementation demonstrates various aspects of advanced Python programming such as:
 
-* *Packaging*: Creation of a Python package, a collection of Python modules structurally organized, to allow for an easy re-usability of the provided functionality, which is the `randtest()` function.
+* *Packaging*: Creation of a Python package, a collection of Python modules structurally organized, to allow for an easy re-usability of the provided functionality, which is mainly the `randtest()` function.
 
 * *Test-Driven Development (TDD)*: Creation of reliable code with the intended functionality (see `tests/`).
 
-* *Functional Programming*: Passing functions to arguments of `randtest()`,
-i.e. `mct` and `tstat` (see below).
+* *Functional Programming*: Passing functions to arguments of `randtest()`, i.e. `mct` and `tstat` (see below).
 The former allows passing a user-defined function for the measure of central tendency computed in the test statistic (default: `statistics.mean`).
 The latter permits passing a user-defined function for the computation of the test statistic. By default, the difference between measures is computed: `mct(data_group_a) - mct(data_group_b)`.
 
 * *Object-Oriented Programming (OOP)*: The `randtest()` function, for example, returns an instance of the class `randtest.base.RandTestResult`, holding all relevant information of the test result.
 
 * *Generators*: The proper use of Python generators allows for a scalable and memory efficient implementation (i.e., results are processed as they come in).
-*Note*: If a user-defined function is passed to `mct`, it requires handing a generator object.
+*Note*: If a user-defined function is passed to `mct`, it requires handling a generator object.
 
-* *Multiprocessing*: Using the `num_jobs` argument permits carrying out the computation over multiple CPUs. 
+* *Multiprocessing*: Using the `num_jobs` argument permits carrying out the computation over multiple CPUs.
 *Note*: Because of it, `randtest()` must be executed below `if __name__ == '__main__':` if a user-defined function is passed to `mct` or `tstat`.
 
-* *Command line interface (CLI)*: Setting up entry points to make functionality available on the CLI.
+* *Command line interface (CLI)*: Setting up entry points to make functionality available on the CLI (see below).
 
-## Basic example
+
+## Theory: Basic example
 
 This example is taken from:
 > E. Stripling, "Distribution-free statistical inference for the comparison of
@@ -51,20 +61,16 @@ In a randomization test, the hypotheses are as follows:
     <img src="misc/hypotheses.png" width="700"/>
 </p>
 
-Now, suppose we have two treatment groups, __A__ and __B__, and four
-experimental units (designated as _a_, _b_, _c_, and _d_), which are randomly
-assigned to the two treatment groups. We conduct the experiment and measure the
- response of the experimental units. Assume we observed the following data
+Now, suppose we have two treatment groups, **A** and **B**, and four experimental units (designated as *a*, *b*, *c*, and *d*), which are randomly assigned to the two treatment groups.
+We conduct the experiment and measure the response of each experimental units. 
+Assume we observed the following data
 <p align="center">
     <img src="misc/observed_data.png" width="400"/>
 </p>
 
-Our test statistic of interest is the difference between arithmetic means,
-where _t<sub>obs</sub>_ is the observed test statistic value. 
-For carry out the randomization test, permute the data and compute the test 
-statistic for each data permutation, which creates the _reference distribution_.
-In this example, the _systematic_ approach is used, meaning that all possible
-data permutations are generated.
+Our test statistic of interest is the difference between arithmetic means, where _t<sub>obs</sub>_ is the observed test statistic value.
+To carry out the randomization test, permute the data and compute the test statistic for each data permutation, which creates the *reference distribution*.
+In this example, the *systematic* approach is used, meaning that all possible data permutations are generated.
 
 <p align="center">
     <img src="misc/permutations.png" width="700"/>
@@ -76,11 +82,10 @@ Based on the data permutations, the two-sided p value can be computed:
     <img src="misc/pvalue.png" width="450"/>
 </p>
 
-That is, simply count how often _T_ (in absolute sense) is equal to or larger than |_t<sub>obs</sub>_| (i.e., number of successes), and divide it by the number of data permutations. 
+That is, simply count how often *T* (its absolute value) is equal to or larger than |_t<sub>obs</sub>_| (referring to it as the number of successes), and divide it by the number of generate data permutations.
 In this example, the exact two-sided p value equals 2/6 or 33%.
 
-Use the `randtest` function to  carry out the analysis in Python.
-Note that `num_permutations = -1` specifies the systematic approach.
+To perform the analysis in Python, use the `randtest()` function with argument `num_permutations=-1` to carry out the systematic approach.
 
 ```{python}
 >>> from randtest import randtest
@@ -100,11 +105,11 @@ p value = 0.333333
 seed = None
 ```
 
-The systematic approach, however, quickly becomes infeasible if the sample size
-increases. 
-In this circumstances, the _Monte Carlo randomization test_ can be
-used to approximate the p value. 
-It is carried out by default with a positive integer for `num_permutations = 10000`.
+The systematic approach, however, quickly becomes infeasible if the sample size increases.
+In this circumstances, the *Monte Carlo randomization test* can be used to approximate the p value.
+The `randtest()` function performs a Monte Carlo randomization test by default with `num_permutations=10000` randomly generated data permutations.
+As the number of permutations is larger, we can make use of multiple CPUs for the computation.
+Following, two cores are used by specifying `num_jobs=2` and a seed value is passed to the random number generator for reproducibility.
 
 ```{python}
 >>> from randtest import randtest
@@ -124,15 +129,15 @@ p value = 0.3312
 seed = None
 ```
 
-We can approximate the p value to an arbitrary degree, simply by increasing the number of permutations.
+The p value can be approximated to an arbitrary degree, simply by increasing the number of permutations.
 
 
 ## User-defined function
 
 By default, `randtest()` computes the difference between arithmetic means.
 If another measure of central tendency is of interest, one can pass a user-defined function.
-Say, we are interested in the trimmed mean.
-We first need to define it:
+Say, we are interested in the 20% trimmed mean.
+We first need to define it (copied from `randtest.mcts.trimmed_mean`):
 
 ```{python}
 def trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
@@ -148,7 +153,7 @@ def trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
 Then, we can pass it to `randtest()` with `mct=trimmed_mean`.
 
 Similarly, we proceed if we want to pass a user-defined function for the test statistic.
-For example, the difference between the measures of central tendencies can be implemented as follows:
+For example, the difference between the measures of central tendencies can be implemented as follows (copied from `randtest.base.test_statistic`):
 
 ```{python}
 def test_statistic(
@@ -163,27 +168,19 @@ We then simply pass it to `tstat=test_statistic`.
 
 
 ## Smart drug example
-To illustrate randomization tests on a more realistic example, consider the
-"smart drug" example described in [(Online)](http://dx.doi.org/10.1037/a0029146):
+To illustrate the use of randomization tests on a more realistic example, consider the "smart drug" example described in [(Online)](http://dx.doi.org/10.1037/a0029146):
 > J. K. Kruschke, "Bayesian estimation supersedes the t test."
 > *Journal of Experimental Psychology: General*, <br/>
-> vol. 142, no. 2, pp. 573-603, May 2013. 
+> vol. 142, no. 2, pp. 573-603, May 2013.
 
-In which, the research question is: _Do people who take the smart drug perform_
-_better on the IQ test than those in the control group?_
-In the experiment, 47 people received the supposedly IQ-enhancement drug
-(group A), and 42 people received an placebo (group B).
-Data have been taken from
-[here](https://github.com/strawlab/best/blob/master/examples/smart_drug.py).
+The research question of interest is: *Do people who take the smart drug perform better on the IQ test than those in the control group?*
+In the experiment, 47 people received the supposedly IQ-enhancement drug (group A), and 42 people received an placebo (group B).
+Data are taken from [here](https://github.com/strawlab/best/blob/master/examples/smart_drug.py).
 
-For this example, two randomization test are carried out: (1) one in which the
-test statistic is the difference between arithmetic means, and (2) in which the
-test statistic is the difference between trimmed means (20% on each side) in
-order to account for the outliers in the data.
-
+For this example, two randomization test are carried out: (1) one in which the test statistic is the difference between the arithmetic means, and (2) in which the test statistic is the difference between the 20% trimmed means (i.e., trimmed 20% on each side) in order to account for the outliers in the data (execute the `example_smart_drug.py`).
 
 ```{bash}
-$ make example_smart_drug 
+$ make example_smart_drug
 python3 examples/smart_drug.py
 [...]
 MCT = Arithmetic Mean
@@ -212,12 +209,82 @@ seed = 0
 ```
 
 For (1), the p value equals 12.8%, meaning that one does not reject the null
-hypothesis at a significance level of 5%. 
-However, this test is naive, since the outliers cause a distortion of the 
-arithmetic means. In (2), the test statistic is robuster against extreme 
-observations, resulting in p value of 1%.
+hypothesis at a significance level of 5%.
+However, this test is *naive*, since the outliers cause a distortion of the
+arithmetic means. 
+As for (2), the test statistic is robuster against extreme observations, resulting in p value of 1%.
 Thus, with the more reasonable test statistic, the null hypothesis is rejected.
-One can therefore conclude that the response of at least one person would have
-been different if (s)he had received the other treatment. 
-Note that the rejection of the null hypothesis with (2) is in line with the 
-conclusion of the robust Bayesian estimation approach carried out by Kruschke.
+One can therefore conclude that the response of at least one person would have been different if (s)he had received the other treatment.
+Note that the rejection of the null hypothesis with (2) is in line with the conclusion of the robust Bayesian estimation approach carried out by Kruschke.
+
+
+## Command Line Interface
+
+Currently, two entry points are exposed that allow performing a randomization test from the command line.
+
+* `randtest-mean`: To perform a randomization test with the arithmetic mean.
+* `randtest-tmean`: To perform a randomization test with the trimmed mean.
+
+Say, we have stored our data as follows:
+
+```{bash}
+$ head group_*.dat
+==> group_A.dat <==
+5
+6
+
+==> group_B.dat <==
+8
+10
+```
+
+We then obtain the same result as shown in the previous example when executing:
+
+```{bash}
+$ randtest-mean -p -1 group_A.dat group_B.dat 
+<class 'randtest.base.RandTestResult'>
+Method = Systematic
+Alternative = two_sided
+MCT(data of group A) = 5.5
+MCT(data of group B) = 9
+Observed test statistic value = -3.5
+Number of successes = 2
+Number of permutations = 6
+p value = 0.333333
+seed = None
+```
+
+To reproduce the results for the smart drug example with the 20% trimmed mean, run on the CLI:
+
+```{bash}
+$ randtest-tmean -p 1000 -n 2 -s 0 $(ls smart_drug_data_{treatment,placebo}_group.dat | sort -r)
+<class 'randtest.base.RandTestResult'>
+Method = Monte Carlo
+Alternative = two_sided
+MCT(data of group A) = 101.586
+MCT(data of group B) = 100.538
+Observed test statistic value = 1.04775
+Number of successes = 10
+Number of permutations = 1000
+p value = 0.01
+seed = 0
+```
+
+This gives us the full power of the CLI.
+We can easily redo the analysis, for example, for the 15% trimmed mean by passing the `-c 15` flag:
+
+```{bash}
+$ randtest-tmean -p 1000 -n 2 -s 0 -c 15 $(ls smart_drug_data_{treatment,placebo}_group.dat | sort -r)
+<class 'randtest.base.RandTestResult'>
+Method = Monte Carlo
+Alternative = two_sided
+MCT(data of group A) = 101.576
+MCT(data of group B) = 100.533
+Observed test statistic value = 1.04242
+Number of successes = 18
+Number of permutations = 1000
+p value = 0.018
+seed = 0
+```
+
+The test results remains significant.

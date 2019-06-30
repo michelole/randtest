@@ -55,4 +55,4 @@ tests:
 ## rmdir:  Remove __pychache__ directories
 .PHONY: rmdir
 rmdir:
-	rm -rf $(find . -name "__pycache__" -type d)
+	find . -name __pycache__ -type d -exec rm -rf {} +

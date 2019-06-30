@@ -3,6 +3,7 @@ Unit tests for randtest
 """
 
 import unittest
+import subprocess
 from types import GeneratorType
 from randtest import randtest
 from randtest.mcts import (
@@ -177,6 +178,112 @@ class TestRandTest(unittest.TestCase):
         )
         self.assertEqual(6, test_result.num_successes)
         self.assertEqual(30, test_result.num_permutations)
+
+    def test_randtest_mean(self):
+        """Test CLI: randtest-mean"""
+        result = subprocess.run(
+            [
+                "randtest-mean",
+                "-p -1",
+                "../data/group_A.dat",
+                "../data/group_B.dat",
+            ],
+            capture_output=True,
+        )
+        excepted_output = (
+            "<class 'randtest.base.RandTestResult'>\n" +
+            "Method = Systematic\n" +
+            "Alternative = two_sided\n" +
+            "MCT(data of group A) = 5.5\n" +
+            "MCT(data of group B) = 9\n" +
+            "Observed test statistic value = -3.5\n" +
+            "Number of successes = 2\n" +
+            "Number of permutations = 6\n" +
+            "p value = 0.333333\n" +
+            "seed = None\n"
+        )
+        self.assertEqual(excepted_output, result.stdout.decode("ascii"))
+
+    def test_randtest_mean_smart_drug(self):
+        """Test CLI: randtest-mean smart drug example"""
+        result = subprocess.run(
+            [
+                "randtest-mean",
+                "-s 0",
+                "-p 1000",
+                "../data/smart_drug_data_treatment_group.dat",
+                "../data/smart_drug_data_placebo_group.dat",
+            ],
+            capture_output=True,
+        )
+        excepted_output = (
+            "<class 'randtest.base.RandTestResult'>\n" +
+            "Method = Monte Carlo\n" +
+            "Alternative = two_sided\n" +
+            "MCT(data of group A) = 101.915\n" +
+            "MCT(data of group B) = 100.357\n" +
+            "Observed test statistic value = 1.55775\n" +
+            "Number of successes = 128\n" +
+            "Number of permutations = 1000\n" +
+            "p value = 0.128\n" +
+            "seed = 0\n"
+        )
+        self.assertEqual(excepted_output, result.stdout.decode("ascii"))
+
+    def test_randtest_tmean_smart_drug_percent20(self):
+        """Test CLI: randtest-tmean (20 percent) smart drug example"""
+        result = subprocess.run(
+            [
+                "randtest-tmean",
+                "-s 0",
+                "-p 1000",
+                "-c 20",
+                "../data/smart_drug_data_treatment_group.dat",
+                "../data/smart_drug_data_placebo_group.dat",
+            ],
+            capture_output=True,
+        )
+        excepted_output = (
+            "<class 'randtest.base.RandTestResult'>\n" +
+            "Method = Monte Carlo\n" +
+            "Alternative = two_sided\n" +
+            "MCT(data of group A) = 101.586\n" +
+            "MCT(data of group B) = 100.538\n" +
+            "Observed test statistic value = 1.04775\n" +
+            "Number of successes = 10\n" +
+            "Number of permutations = 1000\n" +
+            "p value = 0.01\n" +
+            "seed = 0\n"
+        )
+        self.assertEqual(excepted_output, result.stdout.decode("ascii"))
+
+    def test_randtest_tmean_smart_drug_percent10(self):
+        """Test CLI: randtest-tmean (10 percent) smart drug example"""
+        result = subprocess.run(
+            [
+                "randtest-tmean",
+                "-s 0",
+                "-p 1000",
+                "-c 10",
+                "../data/smart_drug_data_treatment_group.dat",
+                "../data/smart_drug_data_placebo_group.dat",
+            ],
+            capture_output=True,
+        )
+        excepted_output = (
+            "<class 'randtest.base.RandTestResult'>\n" +
+            "Method = Monte Carlo\n" +
+            "Alternative = two_sided\n" +
+            "MCT(data of group A) = 101.487\n" +
+            "MCT(data of group B) = 100.529\n" +
+            "Observed test statistic value = 0.957768\n" +
+            "Number of successes = 64\n" +
+            "Number of permutations = 1000\n" +
+            "p value = 0.064\n" +
+            "seed = 0\n"
+        )
+        self.assertEqual(excepted_output, result.stdout.decode("ascii"))
+
 
 
 def mct_func_mean(data: GeneratorType) -> float:

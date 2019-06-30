@@ -5,6 +5,7 @@ argparse boilerplate code
 import ast
 import argparse
 import textwrap
+from randtest import __version__
 
 
 def read_data(ifname):
@@ -23,43 +24,50 @@ def argparse_cli(description):
         description=textwrap.dedent(description)
     )
     parser.add_argument(
+        "-v",
+        "--version",
+        action="version",
+        #  version="%(prog)s " + __version__,
+        version=__version__,
+    )
+    parser.add_argument(
         "-a",
         metavar="alternative",
         type=str,
         choices=["two_sided", "greater", "less"],
         default="two_sided",
-        help="Alternative hypothesis (default: 'two_sided')."
+        help="alternative hypothesis (default: 'two_sided')."
     )
     parser.add_argument(
         "-p",
         metavar="num_permutations",
         type=int,
         default=10000,
-        help="Number of permutations (default: 10000)."
+        help="number of permutations (default: 10000)."
     )
     parser.add_argument(
         "-n",
         metavar="num_jobs",
         type=int,
         default=1,
-        help="Number of jobs (default: 1)."
+        help="number of jobs (default: 1)."
     )
     parser.add_argument(
         "-s",
         metavar="seed",
         type=int,
         default=None,
-        help="Seed to initialize the random number generator (default: None)",
+        help="seed to initialize the random number generator (default: None)",
     )
 
     parser.add_argument(
         "fname_data_A",
         type=str,
-        help="File name group A data.",
+        help="file name group A data.",
     )
     parser.add_argument(
         "fname_data_B",
         type=str,
-        help="File name group B data.",
+        help="file name group B data.",
     )
     return parser
