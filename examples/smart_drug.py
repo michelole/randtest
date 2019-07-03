@@ -30,13 +30,16 @@ from randtest.mcts import trimmed_mean
 
 def smart_drug(mct, nperm=1000, seed=0):
     """Randomization test with smart drug data"""
-    # First parent refers to the directory of the script
-    parent_directory = str(pathlib.Path(__file__).parent.parent.resolve())
-    ifname_group_a = (
-        parent_directory + "/data/smart_drug_data_treatment_group.dat"
+    # If path points to a file, the first parent
+    # is the directory the file is stored in
+    base_directory = pathlib.Path(__file__).parent.parent.resolve()
+    ifname_group_a = base_directory.joinpath(
+         "data",
+         "smart_drug_data_treatment_group.dat",
     )
-    ifname_group_b = (
-        parent_directory + "/data/smart_drug_data_placebo_group.dat"
+    ifname_group_b = base_directory.joinpath(
+         "data",
+         "smart_drug_data_placebo_group.dat",
     )
     with open(ifname_group_a, 'r') as fobj:
         group_a = tuple(int(val.strip()) for val in fobj.readlines())

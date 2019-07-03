@@ -141,6 +141,9 @@ Say, we are interested in the 20% trimmed mean.
 We first need to define it (copied from `randtest.mcts.trimmed_mean`):
 
 ```{python}
+from types import GeneratorType, FunctionType
+
+
 def trimmed_mean(data: GeneratorType, trim_percent=.2) -> float:
     """Trimmed mean"""
     data_sorted = tuple(sorted(data))
@@ -172,6 +175,14 @@ We then simply pass it to `tstat=test_statistic`.
 As for the trimmed mean, one could surely use SciPy implementation as well.
 Let's compare the execution times.
 First, for the implementation as shown above:
+
+```
+x = (
+    101, 100, 102, 104, 102, 97, 105, 105, 98, 101, 100, 123, 105, 103, 100, 95,
+    102, 106, 109, 102, 82, 102, 100, 102, 102, 101, 102, 102, 103, 103, 97, 97,
+    103, 101, 97, 104, 96, 103, 124, 101, 101, 100, 101, 101, 104, 100, 101
+)
+```
 
 ```
 %timeit -n 100000 trimmed_mean(x)
