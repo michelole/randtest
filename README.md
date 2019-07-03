@@ -177,6 +177,9 @@ Let's compare the execution times.
 First, for the implementation as shown above:
 
 ```
+from scipy.stats import trim_mean
+
+
 x = (
     101, 100, 102, 104, 102, 97, 105, 105, 98, 101, 100, 123, 105, 103, 100, 95,
     102, 106, 109, 102, 82, 102, 100, 102, 102, 101, 102, 102, 103, 103, 97, 97,

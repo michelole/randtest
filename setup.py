@@ -1,6 +1,6 @@
 """Packaging settings"""
 
-from os.path import abspath, dirname, join
+from pathlib import Path
 from setuptools import setup, find_packages
 
 
@@ -11,8 +11,8 @@ from randtest import (
 )
 
 
-with open(join(abspath(dirname(__file__)), "README.md"), 'r') as fh:
-    LONG_DESCRIPTION = fh.read()
+base_directory = Path(__file__).parent.resolve()
+long_desc = base_directory.joinpath("README.md").read_text()
 
 
 setup(
@@ -21,7 +21,7 @@ setup(
     author=__author__,
     author_email=__email__,
     description="Randomization tests for two-sample comparison.",
-    long_description=LONG_DESCRIPTION,
+    long_description=long_desc,
     long_description_content_type="text/markdown",
     url="https://github.com/estripling/randtest",
     python_requires=">= 3.5",
