@@ -231,12 +231,12 @@ class RandTest:
 
     def _log_progress(self):
         """Log Progress"""
-        log_msg = "p value = {:d} / {:d} = {:g}".format(
+        logging.info(
+            "p value = %d / %d = %g",
             self.num_successes,
             self.num_permutations,
             self.num_successes / self.num_permutations,
         )
-        logging.info(log_msg)
 
     def _get_random_indices(self):
         # Valid Monte Carlo Randomization Test includes observed tobs
@@ -395,30 +395,26 @@ def randtest(
     if num_jobs > 0:
         n_jobs = num_jobs
         if num_jobs > max_cores:
-            log_msg = (
-                "Specified number of jobs ({:d}) is larger than the " +
-                "maximum number of cores ({:d}). " +
-                "Setting number of jobs to {:d}."
-            ).format(
+            logging.warning(
+                "Specified number of jobs (%d) is larger than the " +
+                "maximum number of cores (%d). " +
+                "Setting number of jobs to %d.",
                 num_jobs,
                 max_cores,
                 max_cores,
             )
-            logging.warning(log_msg)
             n_jobs = max_cores
     else:
         n_jobs = max_cores + num_jobs + 1
         if n_jobs <= 0:
-            log_msg = (
-                "Specified number of jobs ({:d}) goes beyond " +
-                "the maximum number of cores ({:d}). " +
-                "Setting number of jobs to {:d}."
-            ).format(
+            logging.warning(
+                "Specified number of jobs (%d) goes beyond " +
+                "the maximum number of cores (%d). " +
+                "Setting number of jobs to %d.",
                 num_jobs,
                 max_cores,
                 max_cores,
             )
-            logging.warning(log_msg)
             n_jobs = max_cores
 
     rtest = RandTest(
