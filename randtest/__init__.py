@@ -12,5 +12,5 @@ E. Edgington and P. Onghena, Randomization Tests, 4th ed.
 from .base import randtest
 
 __author__ = "E. Stripling"
-__email__ = "eugen.stripling@kuleuven.be"
+__email__ = "estripling042@gmail.com"
 __version__ = "0.0.1"
